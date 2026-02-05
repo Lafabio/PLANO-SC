@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Planejamento Anual - Busca Curricular</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0056a6;
+            --secondary-color: #e6f2ff;
+            --accent-color: #28a745;
+            --warning-color: #ffc107;
+            --light-gray: #f5f5f5;
+            --border-color: #ddd;
+            --text-color: #333;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 5px solid #003366;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-placeholder {
+            width: 70px;
+            height: 70px;
+            background-color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        .logo-text h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .search-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        select, input, button, textarea {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            padding: 12px 25px;
+        }
+        
+        .btn:hover {
+            background-color: #004080;
+        }
+        
+        .btn-success {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .search-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .floating-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            overflow: hidden;
+            max-height: 80vh;
+        }
+        
+        .panel-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-content {
+            padding: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .close-panel {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .data-item {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: var(--light-gray);
+        }
+        
+        .data-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .add-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .data-content {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: white;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loader i {
+            font-size: 30px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .results-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 15px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .result-card:hover {
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .use-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .info-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .form-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .form-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .floating-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .floating-panel {
+                width: calc(100% - 40px);
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>GERADOR DE PLANEJAMENTO ANUAL</h1>
+                    <p>Currículo Base do Território Catarinense</p>
+                </div>
+            </div>
+            <div>
+                <h2>PLANEJAMENTO ANUAL 20__</h2>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="search-section">
+            <h2 class="search-title"><i class="fas fa-search"></i> Buscar Conteúdos Curriculares - CNT</h2>
+            
+            <div class="info-box">
+                <p><strong>Instruções:</strong> Selecione a disciplina e série/ano para buscar conteúdos, habilidades e objetos de conhecimento do Currículo Base do Território Catarinense - Ciências da Natureza e suas Tecnologias. Os resultados podem ser adicionados ao seu planejamento.</p>
+            </div>
+            
+            <div class="search-filters">
+                <div class="filter-group">
+                    <label for="disciplina">Disciplina:</label>
+                    <select id="disciplina" name="disciplina">
+                        <option value="">Selecione uma disciplina</option>
+                        <option value="biologia">Biologia</option>
+                        <option value="ciencias">Ciências</option>
+                        <option value="fisica">Física</option>
+                        <option value="quimica">Química</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="serie">Série/Ano:</label>
+                    <select id="serie" name="serie">
+                        <option value="">Selecione uma série/ano</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="trimestre">Trimestre:</label>
+                    <select id="trimestre" name="trimestre">
+                        <option value="1">1º Trimestre</option>
+                        <option value="2">2º Trimestre</option>
+                        <option value="3">3º Trimestre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="search-actions">
+                <button id="searchBtn" class="btn btn-success">
+                    <i class="fas fa-search"></i> Buscar Conteúdos
+                </button>
+                <button id="clearSearchBtn" class="btn">
+                    <i class="fas fa-broom"></i> Limpar Busca
+                </button>
+                <button id="showFormBtn" class="btn btn-success">
+                    <i class="fas fa-file-alt"></i> Ir para Formulário
+                </button>
+            </div>
+        </div>
+        
+        <div class="loader hidden" id="loader">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Buscando conteúdos curriculares...</p>
+        </div>
+        
+        <div class="no-results hidden" id="noResults">
+            <i class="fas fa-search" style="font-size: 40px; margin-bottom: 15px; color: #ccc;"></i>
+            <h3>Nenhum resultado encontrado</h3>
+            <p>Selecione uma disciplina e série/ano para buscar conteúdos curriculares.</p>
+        </div>
+        
+        <div class="results-section hidden" id="resultsSection">
+            <div class="results-header">
+                <h3><i class="fas fa-list-check"></i> Conteúdos Encontrados</h3>
+                <div>
+                    <span id="resultsCount">0 resultados</span>
+                </div>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" data-tab="unidades">Unidades Temáticas</div>
+                    <div class="tab" data-tab="habilidades">Habilidades</div>
+                    <div class="tab" data-tab="objetos">Objetos de Conhecimento</div>
+                    <div class="tab" data-tab="procedimentos">Procedimentos Metodológicos</div>
+                    <div class="tab" data-tab="avaliacao">Avaliação</div>
+                </div>
+                
+                <div class="tab-content active" id="unidadesTab">
+                    <div class="results-grid" id="unidadesGrid">
+                        <!-- Unidades temáticas serão inseridas aqui -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="habilidadesTab">
+                    <div class="results-grid" id="habilidadesGrid">
+                        <!-- Habilidades serão inseridas aqui -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="objetosTab">
+                    <div class="results-grid" id="objetosGrid">
+                        <!-- Objetos de conhecimento serão inseridas aqui -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="procedimentosTab">
+                    <div class="results-grid" id="procedimentosGrid">
+                        <!-- Procedimentos metodológicos serão inseridas aqui -->
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="avaliacaoTab">
+                    <div class="results-grid" id="avaliacaoGrid">
+                        <!-- Avaliação será inserida aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section hidden" id="formSection">
+            <h2><i class="fas fa-edit"></i> Formulário de Planejamento</h2>
+            
+            <div class="info-box">
+                <p><strong>Dica:</strong> Use o painel flutuante para adicionar conteúdos encontrados diretamente ao seu planejamento. Preencha os demais campos manualmente.</p>
+            </div>
+            
+            <form id="plannerForm">
+                <div class="form-grid">
+                    <div class="filter-group">
+                        <label for="escola">Escola:</label>
+                        <input type="text" id="escola" name="escola" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="professor">Professor:</label>
+                        <input type="text" id="professor" name="professor" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="areaConhecimento">Área de Conhecimento:</label>
+                        <select id="areaConhecimento" name="areaConhecimento" required>
+                            <option value="">Selecione</option>
+                            <option value="Ciências da Natureza e suas Tecnologias">Ciências da Natureza e suas Tecnologias</option>
+                            <option value="Linguagens e suas Tecnologias">Linguagens e suas Tecnologias</option>
+                            <option value="Matemática e suas Tecnologias">Matemática e suas Tecnologias</option>
+                            <option value="Ciências Humanas e Sociais Aplicadas">Ciências Humanas e Sociais Aplicadas</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="componenteCurricular">Componente Curricular:</label>
+                        <input type="text" id="componenteCurricular" name="componenteCurricular" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="etapaCurso">Etapa/Curso:</label>
+                        <select id="etapaCurso" name="etapaCurso" required>
+                            <option value="">Selecione</option>
+                            <option value="Ensino Fundamental Anos iniciais">Ensino Fundamental Anos iniciais</option>
+                            <option value="Ensino Fundamental Anos finais">Ensino Fundamental Anos finais</option>
+                            <option value="Ensino Médio">Ensino Médio</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="serieAno">Série/Ano:</label>
+                        <input type="text" id="serieAnoForm" name="serieAno" required>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="aulasSemanais">Nº de aulas semanais:</label>
+                        <input type="number" id="aulasSemanais" name="aulasSemanais" min="1" max="20" required>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="competenciasArea">Competências específicas por Área de Conhecimento:</label>
+                    <textarea id="competenciasArea" name="competenciasArea" rows="4"></textarea>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="competenciasComponente">Competências específicas por Componente Curricular:</label>
+                    <textarea id="competenciasComponente" name="competenciasComponente" rows="4"></textarea>
+                </div>
+                
+                <div class="tab-container" style="margin-top: 30px;">
+                    <div class="tabs">
+                        <div class="tab active" data-form-tab="1">1º Trimestre</div>
+                        <div class="tab" data-form-tab="2">2º Trimestre</div>
+                        <div class="tab" data-form-tab="3">3º Trimestre</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="trimestre1Tab">
+                        <div class="form-grid">
+                            <div class="filter-group">
+                                <label for="unidades1">Unidades Temáticas:</label>
+                                <textarea id="unidades1" name="unidades1" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="habilidades1">Habilidades:</label>
+                                <textarea id="habilidades1" name="habilidades1" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="objetos1">Objetos de Conhecimento:</label>
+                                <textarea id="objetos1" name="objetos1" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="procedimentos1">Procedimentos Metodológicos:</label>
+                                <textarea id="procedimentos1" name="procedimentos1" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="avaliacao1">Avaliação:</label>
+                                <textarea id="avaliacao1" name="avaliacao1" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="trimestre2Tab">
+                        <div class="form-grid">
+                            <div class="filter-group">
+                                <label for="unidades2">Unidades Temáticas:</label>
+                                <textarea id="unidades2" name="unidades2" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="habilidades2">Habilidades:</label>
+                                <textarea id="habilidades2" name="habilidades2" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="objetos2">Objetos de Conhecimento:</label>
+                                <textarea id="objetos2" name="objetos2" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="procedimentos2">Procedimentos Metodológicos:</label>
+                                <textarea id="procedimentos2" name="procedimentos2" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="avaliacao2">Avaliação:</label>
+                                <textarea id="avaliacao2" name="avaliacao2" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="trimestre3Tab">
+                        <div class="form-grid">
+                            <div class="filter-group">
+                                <label for="unidades3">Unidades Temáticas:</label>
+                                <textarea id="unidades3" name="unidades3" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="habilidades3">Habilidades:</label>
+                                <textarea id="habilidades3" name="habilidades3" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="objetos3">Objetos de Conhecimento:</label>
+                                <textarea id="objetos3" name="objetos3" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="procedimentos3">Procedimentos Metodológicos:</label>
+                                <textarea id="procedimentos3" name="procedimentos3" rows="6"></textarea>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="avaliacao3">Avaliação:</label>
+                                <textarea id="avaliacao3" name="avaliacao3" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group" style="margin-top: 30px;">
+                    <label for="referencias">Referências:</label>
+                    <textarea id="referencias" name="referencias" rows="4"></textarea>
+                </div>
+                
+                <div class="actions">
+                    <button type="button" id="generateDocBtn" class="btn btn-success">
+                        <i class="fas fa-file-word"></i> Gerar Documento DOC
+                    </button>
+                    <button type="button" id="clearFormBtn" class="btn">
+                        <i class="fas fa-broom"></i> Limpar Formulário
+                    </button>
+                    <button type="button" id="backToSearchBtn" class="btn btn-warning">
+                        <i class="fas fa-arrow-left"></i> Voltar para Busca
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+    
+    <!-- Floating Panel -->
+    <div class="floating-panel hidden" id="floatingPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-clipboard-list"></i> Itens Selecionados</h3>
+            <button class="close-panel" id="closePanelBtn">&times;</button>
+        </div>
+        <div class="panel-content" id="panelContent">
+            <p style="text-align: center; color: #666; padding: 20px;">Nenhum item selecionado ainda.</p>
+        </div>
+    </div>
+    
+    <!-- Floating Button to Show Panel -->
+    <button class="floating-btn" id="floatingBtn">
+        <i class="fas fa-clipboard-check"></i>
+        <span class="floating-badge hidden" id="selectionBadge">0</span>
+    </button>
+    
+    <footer>
+        <div class="container">
+            <p>Gerador de Planejamento Anual - Currículo Base do Território Catarinense</p>
+            <p>© 2023 - Ciências da Natureza e suas Tecnologias (Biologia, Ciências, Física, Química)</p>
+        </div>
+    </footer>
+
+    <script>
+        // Base de dados do Currículo Base do Território Catarinense - CNT
+        const curriculumData = {
+            biologia: {
+                "1medio": {
+                    nome: "1ª Série do Ensino Médio",
+                    unidades: [
+                        "Vida e evolução: compreendendo a origem e diversidade",
+                        "Ecossistemas e interações: relações ecológicas e fluxo de energia",
+                        "Genética e biotecnologia: princípios e aplicações",
+                        "Saúde e qualidade de vida: promoção e prevenção"
+                    ],
+                    habilidades: [
+                        "EM13CNT101 - Analisar fenômenos naturais e processos tecnológicos, com base nas interações e relações entre matéria e energia, para compreender e avaliar ações humanas e suas consequências.",
+                        "EM13CNT102 - Avaliar o potencial biotecnológico dos sistemas naturais, com base em conhecimentos das ciências da natureza, para propor alternativas de preservação e recuperação da biodiversidade.",
+                        "EM13CNT103 - Utilizar códigos, nomenclaturas e unidades de medida, para representar e comunicar dados, processos e resultados das ciências da natureza.",
+                        "EM13CNT201 - Investigar situações-problema e avaliar aplicações do conhecimento científico e tecnológico e suas implicações no mundo, utilizando procedimentos e linguagens próprios das ciências da natureza, para questionar, avaliar e tomar decisões.",
+                        "EM13CNT202 - Analisar e utilizar modelos científicos, propostos em diferentes formas de representação e em diferentes contextos, para compreender sistemas, processos ou fenômenos estudados nas ciências da natureza."
+                    ],
+                    objetos: [
+                        "Origem da vida e evolução: teorias, evidências e processos evolutivos",
+                        "Biodiversidade: classificação, características e importância dos seres vivos",
+                        "Ecologia: ecossistemas, cadeias alimentares, ciclos biogeoquímicos",
+                        "Genética básica: DNA, RNA, síntese proteica, leis de Mendel",
+                        "Saúde coletiva: doenças, prevenção, promoção da saúde",
+                        "Biotecnologia: técnicas e aplicações na agricultura, medicina e meio ambiente"
+                    ],
+                    procedimentos: [
+                        "Investigação de situações-problema relacionadas à biodiversidade local",
+                        "Análise de modelos científicos sobre evolução e genética",
+                        "Experimentação com materiais alternativos para compreensão de processos biológicos",
+                        "Pesquisa sobre aplicações biotecnológicas no cotidiano",
+                        "Debates sobre questões socioambientais contemporâneas"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de investigação científica",
+                        "Avaliação da participação em debates e discussões coletivas",
+                        "Verificação da compreensão de modelos científicos",
+                        "Avaliação de projetos de intervenção comunitária",
+                        "Análise de portfólios com registros de aprendizagem"
+                    ]
+                },
+                "2medio": {
+                    nome: "2ª Série do Ensino Médio",
+                    unidades: [
+                        "Estrutura e função dos seres vivos: dos níveis molecular aos organismais",
+                        "Fisiologia humana: integração e regulação dos sistemas",
+                        "Microbiologia e imunologia: microrganismos e defesa do corpo",
+                        "Biodiversidade e conservação: importância e estratégias"
+                    ],
+                    habilidades: [
+                        "EM13CNT301 - Avaliar e prever efeitos de intervenções humanas nos ecossistemas, considerando a capacidade de suporte, a resiliência e a sustentabilidade, para propor soluções que minimizem impactos e recuperem ambientes degradados.",
+                        "EM13CNT302 - Analisar e comparar diferentes modelos explicativos sobre a origem e evolução da vida, da Terra e do Universo, para compreender a produção do conhecimento científico e tecnológico ao longo da história.",
+                        "EM13CNT303 - Avaliar os impactos de diferentes tecnologias relacionadas à citologia, histologia, fisiologia e microbiologia na saúde individual e coletiva, considerando aspectos éticos, sociais, econômicos e ambientais.",
+                        "EM13CNT304 - Utilizar diferentes linguagens e tecnologias digitais de informação e comunicação para produzir, divulgar e compartilhar conhecimentos das ciências da natureza, considerando contextos e finalidades diversas.",
+                        "EM13CNT305 - Investigar e analisar as relações entre conhecimentos tradicionais, saberes populares e conhecimento científico sobre a natureza, reconhecendo a contribuição dos diferentes povos e culturas para a produção do conhecimento."
+                    ],
+                    objetos: [
+                        "Citologia: estrutura e função celular, metabolismo energético",
+                        "Histologia: tecidos animais e vegetais",
+                        "Fisiologia humana: sistemas digestório, respiratório, circulatório, excretor",
+                        "Microbiologia: vírus, bactérias, fungos e suas aplicações",
+                        "Imunologia: sistema imune, vacinas, soros",
+                        "Conservação: unidades de conservação, espécies ameaçadas, legislação ambiental"
+                    ],
+                    procedimentos: [
+                        "Observação microscópica de células e tecidos",
+                        "Análise de casos clínicos relacionados à fisiologia humana",
+                        "Pesquisa sobre doenças infecciosas e medidas preventivas",
+                        "Visitas técnicas a unidades de conservação ou jardins botânicos",
+                        "Elaboração de projetos de educação ambiental"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de atividades práticas",
+                        "Avaliação de seminários sobre temas da atualidade",
+                        "Verificação da compreensão de processos fisiológicos",
+                        "Avaliação de projetos de intervenção ambiental",
+                        "Análise de portfólios com registros de aprendizagem"
+                    ]
+                },
+                "3medio": {
+                    nome: "3ª Série do Ensino Médio",
+                    unidades: [
+                        "Biologia molecular e genética avançada",
+                        "Evolução e paleontologia",
+                        "Biologia do desenvolvimento e reprodução",
+                        "Tecnologias ambientais e sustentabilidade"
+                    ],
+                    habilidades: [
+                        "EM13CNT401 - Avaliar implicações éticas, sociais, econômicas e ambientais do desenvolvimento de tecnologias e da produção e consumo de bens, para propor soluções sustentáveis que respeitem a diversidade sociocultural e garantam os direitos humanos.",
+                        "EM13CNT402 - Analisar e comparar diferentes explicações para a origem e evolução da vida, considerando os contextos históricos, sociais e culturais em que foram produzidas, para compreender a natureza do conhecimento científico como construção humana.",
+                        "EM13CNT403 - Investigar e analisar os impactos das atividades humanas sobre a biodiversidade e os serviços ecossistêmicos, para propor ações de conservação, recuperação e uso sustentável.",
+                        "EM13CNT404 - Utilizar conhecimentos das ciências da natureza para tomar decisões sobre questões científicas e tecnológicas relevantes para a sociedade, considerando diferentes perspectivas e interesses.",
+                        "EM13CNT405 - Comunicar, por meio de diferentes linguagens e recursos, conhecimentos, procedimentos e resultados de investigações das ciências da natureza, considerando públicos diversos."
+                    ],
+                    objetos: [
+                        "Engenharia genética: técnicas de DNA recombinante, terapia gênica",
+                        "Evolução: mecanismos, evidências, teoria sintética",
+                        "Embriologia: desenvolvimento embrionário, gametogênese",
+                        "Reprodução humana: sistemas reprodutores, métodos contraceptivos",
+                        "Tecnologias ambientais: biorremediação, tratamento de resíduos",
+                        "Bioética: questões éticas em biotecnologia e pesquisa científica"
+                    ],
+                    procedimentos: [
+                        "Análise de casos de bioética em biotecnologia",
+                        "Simulações de processos evolutivos",
+                        "Pesquisa sobre tecnologias ambientais inovadoras",
+                        "Debates sobre políticas públicas em ciência e tecnologia",
+                        "Elaboração de projetos de pesquisa científica"
+                    ],
+                    avaliacao: [
+                        "Avaliação de artigos científicos produzidos pelos estudantes",
+                        "Análise de posicionamentos em debates sobre bioética",
+                        "Verificação da compreensão de processos evolutivos",
+                        "Avaliação de projetos de pesquisa científica",
+                        "Análise de portfólios com registros de aprendizagem"
+                    ]
+                }
+            },
+            ciencias: {
+                "6ano": {
+                    nome: "6º Ano do Fundamental",
+                    unidades: [
+                        "Terra e Universo: Sistema Solar e fenômenos astronômicos",
+                        "Matéria e energia: propriedades e transformações",
+                        "Vida e ambiente: diversidade dos seres vivos",
+                        "Tecnologia e sociedade: inovações e impactos"
+                    ],
+                    habilidades: [
+                        "EF06CI01 - Identificar e representar os diferentes componentes do Sistema Solar e analisar os movimentos dos planetas ao redor do Sol.",
+                        "EF06CI02 - Diferenciar entre fenômenos físicos e químicos, com base na transformação ou não da natureza da matéria.",
+                        "EF06CI03 - Classificar os seres vivos em grupos taxonômicos, com base em características morfológicas e funcionais.",
+                        "EF06CI04 - Analisar a importância da água e do solo para os seres vivos, propondo medidas de conservação e uso sustentável.",
+                        "EF06CI05 - Relacionar o desenvolvimento de tecnologias às necessidades humanas, identificando impactos positivos e negativos."
+                    ],
+                    objetos: [
+                        "Sistema Solar: planetas, satélites, cometas, asteroides",
+                        "Movimentos da Terra: rotação, translação, estações do ano",
+                        "Propriedades da matéria: massa, volume, densidade, estados físicos",
+                        "Fenômenos físicos e químicos: exemplos e evidências",
+                        "Classificação dos seres vivos: critérios e sistemas",
+                        "Ciclo da água: processos e importância"
+                    ],
+                    procedimentos: [
+                        "Observação do céu noturno e identificação de astros",
+                        "Experimentação com materiais para estudo das propriedades da matéria",
+                        "Coleta e observação de seres vivos do entorno",
+                        "Pesquisa sobre tecnologias utilizadas no cotidiano",
+                        "Visitas a estações de tratamento de água"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de observação",
+                        "Avaliação de maquetes ou modelos do Sistema Solar",
+                        "Verificação da compreensão dos processos estudados",
+                        "Avaliação de propostas de conservação ambiental",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "7ano": {
+                    nome: "7º Ano do Fundamental",
+                    unidades: [
+                        "Organização dos seres vivos: células, tecidos e órgãos",
+                        "Corpo humano: sistemas e saúde",
+                        "Ecossistemas: relações e dinâmicas",
+                        "Energia: formas, transformações e fontes"
+                    ],
+                    habilidades: [
+                        "EF07CI01 - Identificar e representar as principais estruturas celulares e relacioná-las com suas funções.",
+                        "EF07CI02 - Comparar os diferentes sistemas do corpo humano, analisando suas estruturas e funções.",
+                        "EF07CI03 - Analisar as relações alimentares entre os seres vivos de um ecossistema, representando-as por meio de cadeias e teias alimentares.",
+                        "EF07CI04 - Diferenciar as principais formas de energia, identificando transformações energéticas em sistemas naturais e tecnológicos.",
+                        "EF07CI05 - Investigar o papel das vacinas, medicamentos e outros procedimentos na prevenção, controle e tratamento de doenças."
+                    ],
+                    objetos: [
+                        "Célula: estrutura, organelas, funções",
+                        "Sistemas do corpo humano: digestório, respiratório, circulatório",
+                        "Ecossistemas: componentes, relações ecológicas, fluxo de energia",
+                        "Formas de energia: cinética, potencial, térmica, luminosa",
+                        "Transformações energéticas: exemplos no cotidiano",
+                        "Saúde: conceito, determinantes, promoção"
+                    ],
+                    procedimentos: [
+                        "Observação microscópica de células",
+                        "Montagem de modelos de sistemas do corpo humano",
+                        "Análise de cadeias alimentares em diferentes ecossistemas",
+                        "Experimentação com transformações energéticas",
+                        "Pesquisa sobre campanhas de saúde pública"
+                    ],
+                    avaliacao: [
+                        "Avaliação de modelos celulares construídos",
+                        "Análise de relatórios de experimentação",
+                        "Verificação da compreensão das relações ecológicas",
+                        "Avaliação de pesquisas sobre saúde pública",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "8ano": {
+                    nome: "8º Ano do Fundamental",
+                    unidades: [
+                        "Substâncias e materiais: composição e propriedades",
+                        "Forças e movimento: interações e efeitos",
+                        "Ondas: características e aplicações",
+                        "Tecnologia e inovação: processos e produtos"
+                    ],
+                    habilidades: [
+                        "EF08CI01 - Identificar e classificar diferentes materiais com base em suas propriedades físicas e químicas.",
+                        "EF08CI02 - Analisar as leis do movimento, aplicando-as para explicar situações cotidianas.",
+                        "EF08CI03 - Caracterizar os diferentes tipos de ondas, relacionando suas propriedades a fenômenos naturais e tecnológicos.",
+                        "EF08CI04 - Investigar processos tecnológicos de produção de materiais, avaliando impactos ambientais e sociais.",
+                        "EF08CI05 - Analisar o funcionamento de dispositivos elétricos simples, relacionando-o aos conceitos de corrente, tensão e resistência."
+                    ],
+                    objetos: [
+                        "Substâncias puras e misturas: métodos de separação",
+                        "Leis de Newton: inércia, força, ação e reação",
+                        "Ondas mecânicas e eletromagnéticas: características e exemplos",
+                        "Processos industriais: produção e transformação de materiais",
+                        "Circuitos elétricos: componentes e funcionamento",
+                        "Tecnologias sustentáveis: princípios e aplicações"
+                    ],
+                    procedimentos: [
+                        "Experimentação com métodos de separação de misturas",
+                        "Análise de situações cotidianas aplicando as leis do movimento",
+                        "Observação de fenômenos ondulatórios",
+                        "Pesquisa sobre processos industriais locais",
+                        "Montagem de circuitos elétricos simples"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos sobre movimento",
+                        "Verificação da compreensão dos fenômenos ondulatórios",
+                        "Avaliação de pesquisas sobre processos industriais",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "9ano": {
+                    nome: "9º Ano do Fundamental",
+                    unidades: [
+                        "Química da vida: átomos, moléculas e reações",
+                        "Eletricidade e magnetismo: fenômenos e aplicações",
+                        "Universo: estrutura e evolução",
+                        "Ciência, tecnologia e sociedade: interações e desafios"
+                    ],
+                    habilidades: [
+                        "EF09CI01 - Identificar e representar a estrutura atômica, relacionando-a com as propriedades dos materiais.",
+                        "EF09CI02 - Analisar fenômenos elétricos e magnéticos, relacionando-os a aplicações tecnológicas.",
+                        "EF09CI03 - Descrever a estrutura e a dinâmica do Universo, com base em modelos científicos.",
+                        "EF09CI04 - Investigar os impactos de atividades humanas sobre o ambiente, propondo soluções para problemas locais.",
+                        "EF09CI05 - Avaliar o papel da ciência e da tecnologia na sociedade contemporânea, considerando aspectos éticos, sociais, econômicos e ambientais."
+                    ],
+                    objetos: [
+                        "Estrutura atômica: partículas subatômicas, modelos atômicos",
+                        "Ligação química: tipos e propriedades das substâncias",
+                        "Eletromagnetismo: corrente elétrica, campo magnético, indução",
+                        "Universo: galáxias, estrelas, sistemas planetários",
+                        "Impactos ambientais: poluição, mudanças climáticas, perda de biodiversidade",
+                        "Ética em ciência: responsabilidade social do cientista"
+                    ],
+                    procedimentos: [
+                        "Modelagem da estrutura atômica",
+                        "Experimentação com fenômenos eletromagnéticos",
+                        "Observação astronômica (quando possível)",
+                        "Análise de dados sobre impactos ambientais",
+                        "Debates sobre questões éticas em ciência e tecnologia"
+                    ],
+                    avaliacao: [
+                        "Avaliação de modelos atômicos construídos",
+                        "Análise de relatórios de experimentação",
+                        "Verificação da compreensão dos modelos do Universo",
+                        "Avaliação de propostas de intervenção ambiental",
+                        "Observação da participação em debates"
+                    ]
+                }
+            },
+            fisica: {
+                "1medio": {
+                    nome: "1ª Série do Ensino Médio",
+                    unidades: [
+                        "Mecânica: movimento, forças e energia",
+                        "Termologia: calor, temperatura e mudanças de estado",
+                        "Ondas: características, propriedades e fenômenos"
+                    ],
+                    habilidades: [
+                        "EM13CNT101 - Analisar fenômenos naturais e processos tecnológicos, com base nas interações e relações entre matéria e energia, para compreender e avaliar ações humanas e suas consequências.",
+                        "EM13CNT201 - Investigar situações-problema e avaliar aplicações do conhecimento científico e tecnológico e suas implicações no mundo, utilizando procedimentos e linguagens próprios das ciências da natureza, para questionar, avaliar e tomar decisões.",
+                        "EM13CNT202 - Analisar e utilizar modelos científicos, propostos em diferentes formas de representação e em diferentes contextos, para compreender sistemas, processos ou fenômenos estudados nas ciências da natureza.",
+                        "EM13CNT203 - Construir e utilizar interpretações e modelos para explicar fenômenos ou sistemas estudados, desenvolvendo a capacidade de proposição, análise, argumentação e previsão.",
+                        "EM13CNT204 - Avaliar e prever efeitos de intervenções humanas nos sistemas naturais, com base nas interações entre matéria e energia, para propor soluções que minimizem impactos e otimizem a utilização de recursos."
+                    ],
+                    objetos: [
+                        "Movimento: conceitos básicos, gráficos, equações",
+                        "Forças: tipos, leis de Newton, aplicações",
+                        "Energia: formas, transformações, conservação",
+                        "Calor e temperatura: conceitos, escalas, transferência",
+                        "Mudanças de estado: processos, calor latente",
+                        "Ondas mecânicas: características, fenômenos, equação"
+                    ],
+                    procedimentos: [
+                        "Análise de situações cotidianas aplicando conceitos de mecânica",
+                        "Experimentação com transferência de calor",
+                        "Observação de fenômenos ondulatórios",
+                        "Resolução de problemas contextualizados",
+                        "Construção de modelos físicos"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos",
+                        "Verificação da compreensão dos conceitos físicos",
+                        "Avaliação de modelos construídos",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "2medio": {
+                    nome: "2ª Série do Ensino Médio",
+                    unidades: [
+                        "Eletromagnetismo: cargas, campos e circuitos",
+                        "Óptica: luz, fenômenos e instrumentos",
+                        "Física moderna: introdução aos conceitos contemporâneos"
+                    ],
+                    habilidades: [
+                        "EM13CNT301 - Avaliar e prever efeitos de intervenções humanas nos sistemas naturais, considerando a capacidade de suporte, a resiliência e a sustentabilidade, para propor soluções que minimizem impactos e recuperem ambientes degradados.",
+                        "EM13CNT302 - Analisar e comparar diferentes modelos explicativos sobre a origem e evolução da vida, da Terra e do Universo, para compreender a produção do conhecimento científico e tecnológico ao longo da história.",
+                        "EM13CNT303 - Avaliar os impactos de diferentes tecnologias relacionadas à citologia, histologia, fisiologia e microbiologia na saúde individual e coletiva, considerando aspectos éticos, sociais, econômicos e ambientais.",
+                        "EM13CNT304 - Utilizar diferentes linguagens e tecnologias digitais de informação e comunicação para produzir, divulgar e compartilhar conhecimentos das ciências da natureza, considerando contextos e finalidades diversas.",
+                        "EM13CNT305 - Investigar e analisar as relações entre conhecimentos tradicionais, saberes populares e conhecimento científico sobre a natureza, reconhecendo a contribuição dos diferentes povos e culturas para a produção do conhecimento."
+                    ],
+                    objetos: [
+                        "Eletrostática: cargas elétricas, força elétrica, campo elétrico",
+                        "Eletrodinâmica: corrente elétrica, circuitos, leis de Ohm",
+                        "Magnetismo: ímãs, campo magnético, força magnética",
+                        "Óptica geométrica: reflexão, refração, lentes, espelhos",
+                        "Óptica física: interferência, difração, polarização",
+                        "Introdução à física quântica e relatividade"
+                    ],
+                    procedimentos: [
+                        "Experimentação com circuitos elétricos",
+                        "Observação de fenômenos ópticos",
+                        "Pesquisa sobre aplicações tecnológicas do eletromagnetismo",
+                        "Análise de situações cotidianas envolvendo óptica",
+                        "Debates sobre implicações da física moderna"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos",
+                        "Verificação da compreensão dos conceitos físicos",
+                        "Avaliação de pesquisas sobre aplicações tecnológicas",
+                        "Observação da participação em debates"
+                    ]
+                },
+                "3medio": {
+                    nome: "3ª Série do Ensino Médio",
+                    unidades: [
+                        "Física térmica e termodinâmica",
+                        "Ondas e acústica",
+                        "Física contemporânea: aplicações e implicações"
+                    ],
+                    habilidades: [
+                        "EM13CNT401 - Avaliar implicações éticas, sociais, econômicas e ambientais do desenvolvimento de tecnologias e da produção e consumo de bens, para propor soluções sustentáveis que respeitem a diversidade sociocultural e garantam os direitos humanos.",
+                        "EM13CNT402 - Analisar e comparar diferentes explicações para a origem e evolução da vida, considerando os contextos históricos, sociais e culturais em que foram produzidas, para compreender a natureza do conhecimento científico como construção humana.",
+                        "EM13CNT403 - Investigar e analisar os impactos das atividades humanas sobre a biodiversidade e os serviços ecossistêmicos, para proposição de ações de conservação, recuperação e uso sustentável.",
+                        "EM13CNT404 - Utilizar conhecimentos das ciências da natureza para tomar decisões sobre questões científicas e tecnológicas relevantes para a sociedade, considerando diferentes perspectivas e interesses.",
+                        "EM13CNT405 - Comunicar, por meio de diferentes linguagens e recursos, conhecimentos, procedimentos e resultados de investigações das ciências da natureza, considerando públicos diversos."
+                    ],
+                    objetos: [
+                        "Termodinâmica: leis, máquinas térmicas, entropia",
+                        "Acústica: som, características, fenômenos",
+                        "Eletromagnetismo avançado: ondas eletromagnéticas, aplicações",
+                        "Física nuclear: radioatividade, aplicações, riscos",
+                        "Física de partículas: conceitos básicos",
+                        "Cosmologia: origem e evolução do Universo"
+                    ],
+                    procedimentos: [
+                        "Análise do funcionamento de máquinas térmicas",
+                        "Experimentação com fenômenos acústicos",
+                        "Pesquisa sobre aplicações da física nuclear",
+                        "Debates sobre implicações éticas da física contemporânea",
+                        "Elaboração de projetos de pesquisa"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos",
+                        "Verificação da compreensão dos conceitos físicos",
+                        "Avaliação de projetos de pesquisa",
+                        "Observação da participação em debates"
+                    ]
+                }
+            },
+            quimica: {
+                "1medio": {
+                    nome: "1ª Série do Ensino Médio",
+                    unidades: [
+                        "Matéria e suas transformações",
+                        "Estrutura atômica e ligações químicas",
+                        "Funções inorgânicas e reações químicas"
+                    ],
+                    habilidades: [
+                        "EM13CNT101 - Analisar fenômenos naturais e processos tecnológicos, com base nas interações e relações entre matéria e energia, para compreender e avaliar ações humanas e suas consequências.",
+                        "EM13CNT201 - Investigar situações-problema e avaliar aplicações do conhecimento científico e tecnológico e suas implicações no mundo, utilizando procedimentos e linguagens próprios das ciências da natureza, para questionar, avaliar e tomar decisões.",
+                        "EM13CNT202 - Analisar e utilizar modelos científicos, propostos em diferentes formas de representação e em diferentes contextos, para compreender sistemas, processos ou fenômenos estudados nas ciências da natureza.",
+                        "EM13CNT203 - Construir e utilizar interpretações e modelos para explicar fenômenos ou sistemas estudados, desenvolvendo a capacidade de proposição, análise, argumentação e previsão.",
+                        "EM13CNT204 - Avaliar e prever efeitos de intervenções humanas nos sistemas naturais, com base nas interações entre matéria e energia, para propor soluções que minimizem impactos e otimizem a utilização de recursos."
+                    ],
+                    objetos: [
+                        "Propriedades da matéria: gerais e específicas",
+                        "Transformações físicas e químicas",
+                        "Modelos atômicos: evolução histórica",
+                        "Ligações químicas: iônica, covalente, metálica",
+                        "Funções inorgânicas: ácidos, bases, sais, óxidos",
+                        "Reações químicas: classificação e balanceamento"
+                    ],
+                    procedimentos: [
+                        "Experimentação com transformações químicas",
+                        "Modelagem atômica e molecular",
+                        "Análise de substâncias do cotidiano",
+                        "Resolução de problemas de balanceamento",
+                        "Pesquisa sobre aplicações das funções inorgânicas"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de modelos construídos",
+                        "Verificação da compreensão dos conceitos químicos",
+                        "Avaliação de problemas resolvidos",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "2medio": {
+                    nome: "2ª Série do Ensino Médio",
+                    unidades: [
+                        "Estequiometria e soluções",
+                        "Termoquímica e cinética química",
+                        "Equilíbrio químico"
+                    ],
+                    habilidades: [
+                        "EM13CNT301 - Avaliar e prever efeitos de intervenções humanas nos sistemas naturais, considerando a capacidade de suporte, a resiliência e a sustentabilidade, para propor soluções que minimizem impactos e recuperem ambientes degradados.",
+                        "EM13CNT302 - Analisar e comparar diferentes modelos explicativos sobre a origem e evolução da vida, da Terra e do Universo, para compreender a produção do conhecimento científico e tecnológico ao longo da história.",
+                        "EM13CNT303 - Avaliar os impactos de diferentes tecnologias relacionadas à citologia, histologia, fisiologia e microbiologia na saúde individual e coletiva, considerando aspectos éticos, sociais, econômicos e ambientais.",
+                        "EM13CNT304 - Utilizar diferentes linguagens e tecnologias digitais de informação e comunicação para produzir, divulgar e compartilhar conhecimentos das ciências da natureza, considerando contextos e finalidades diversas.",
+                        "EM13CNT305 - Investigar e analisar as relações entre conhecimentos tradicionais, saberes populares e conhecimento científico sobre a natureza, reconhecendo a contribuição dos diferentes povos e culturas para a produção do conhecimento."
+                    ],
+                    objetos: [
+                        "Cálculos estequiométricos",
+                        "Concentração de soluções: comum, molar, título",
+                        "Termoquímica: calor de reação, entalpia, leis",
+                        "Cinética química: velocidade, fatores, teoria",
+                        "Equilíbrio químico: constante, deslocamento",
+                        "Equilíbrio iônico: pH, pOH, indicadores"
+                    ],
+                    procedimentos: [
+                        "Resolução de problemas estequiométricos",
+                        "Preparação de soluções com diferentes concentrações",
+                        "Experimentação com reações endotérmicas e exotérmicas",
+                        "Análise de fatores que afetam a velocidade das reações",
+                        "Determinação de pH de substâncias do cotidiano"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos",
+                        "Verificação da compreensão dos conceitos químicos",
+                        "Avaliação de relatórios de práticas laboratoriais",
+                        "Observação da participação em atividades práticas"
+                    ]
+                },
+                "3medio": {
+                    nome: "3ª Série do Ensino Médio",
+                    unidades: [
+                        "Eletroquímica",
+                        "Química orgânica",
+                        "Química ambiental e tecnológica"
+                    ],
+                    habilidades: [
+                        "EM13CNT401 - Avaliar implicações éticas, sociais, econômicas e ambientais do desenvolvimento de tecnologias e da produção e consumo de bens, para propor soluções sustentáveis que respeitem a diversidade sociocultural e garantam os direitos humanos.",
+                        "EM13CNT402 - Analisar e comparar diferentes explicações para a origem e evolução da vida, considerando os contextos históricos, sociais e culturais em que foram produzidas, para compreender a natureza do conhecimento científico como construção humana.",
+                        "EM13CNT403 - Investigar e analisar os impactos das atividades humanas sobre a biodiversidade e os serviços ecossistêmicos, para proposição de ações de conservação, recuperação e uso sustentável.",
+                        "EM13CNT404 - Utilizar conhecimentos das ciências da natureza para tomar decisões sobre questões científicas e tecnológicas relevantes para a sociedade, considerando diferentes perspectivas e interesses.",
+                        "EM13CNT405 - Comunicar, por meio de diferentes linguagens e recursos, conhecimentos, procedimentos e resultados de investigações das ciências da natureza, considerando públicos diversos."
+                    ],
+                    objetos: [
+                        "Pilhas e baterias: funcionamento, aplicações",
+                        "Eletrólise: processos, leis, aplicações",
+                        "Química do carbono: características, hibridação",
+                        "Funções orgânicas: hidrocarbonetos, álcoois, ácidos",
+                        "Polímeros: naturais, sintéticos, reciclagem",
+                        "Química ambiental: poluição, tratamento, sustentabilidade"
+                    ],
+                    procedimentos: [
+                        "Montagem de pilhas simples",
+                        "Identificação de funções orgânicas em produtos do cotidiano",
+                        "Pesquisa sobre polímeros e reciclagem",
+                        "Análise de problemas ambientais locais",
+                        "Debates sobre questões éticas em química tecnológica"
+                    ],
+                    avaliacao: [
+                        "Análise de relatórios de experimentação",
+                        "Avaliação de problemas resolvidos",
+                        "Verificação da compreensão dos conceitos químicos",
+                        "Avaliação de pesquisas sobre química ambiental",
+                        "Observação da participação em debates"
+                    ]
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos principais
+            const disciplinaSelect = document.getElementById('disciplina');
+            const serieSelect = document.getElementById('serie');
+            const searchBtn = document.getElementById('searchBtn');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            const showFormBtn = document.getElementById('showFormBtn');
+            const loader = document.getElementById('loader');
+            const noResults = document.getElementById('noResults');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsCount = document.getElementById('resultsCount');
+            const formSection = document.getElementById('formSection');
+            const backToSearchBtn = document.getElementById('backToSearchBtn');
+            
+            // Painel flutuante
+            const floatingPanel = document.getElementById('floatingPanel');
+            const floatingBtn = document.getElementById('floatingBtn');
+            const closePanelBtn = document.getElementById('closePanelBtn');
+            const panelContent = document.getElementById('panelContent');
+            const selectionBadge = document.getElementById('selectionBadge');
+            
+            // Formulário
+            const componenteCurricularInput = document.getElementById('componenteCurricular');
+            const serieAnoFormInput = document.getElementById('serieAnoForm');
+            const etapaCursoSelect = document.getElementById('etapaCurso');
+            const areaConhecimentoInput = document.getElementById('areaConhecimento');
+            const generateDocBtn = document.getElementById('generateDocBtn');
+            const clearFormBtn = document.getElementById('clearFormBtn');
+            
+            // Dados das seleções do usuário
+            let selectedItems = {
+                unidades: [],
+                habilidades: [],
+                objetos: [],
+                procedimentos: [],
+                avaliacao: []
+            };
+            
+            // Filtro de séries baseado na disciplina
+            disciplinaSelect.addEventListener('change', function() {
+                const disciplina = this.value;
+                serieSelect.innerHTML = '<option value="">Selecione uma série/ano</option>';
+                
+                if (disciplina === 'biologia') {
+                    serieSelect.innerHTML += `
+                        <option value="1medio">1ª Série do Ensino Médio</option>
+                        <option value="2medio">2ª Série do Ensino Médio</option>
+                        <option value="3medio">3ª Série do Ensino Médio</option>
+                    `;
+                    // Preencher automaticamente alguns campos do formulário
+                    componenteCurricularInput.value = 'Biologia';
+                    areaConhecimentoInput.value = 'Ciências da Natureza e suas Tecnologias';
+                    etapaCursoSelect.value = 'Ensino Médio';
+                } else if (disciplina === 'ciencias') {
+                    serieSelect.innerHTML += `
+                        <option value="6ano">6º Ano do Fundamental</option>
+                        <option value="7ano">7º Ano do Fundamental</option>
+                        <option value="8ano">8º Ano do Fundamental</option>
+                        <option value="9ano">9º Ano do Fundamental</option>
+                    `;
+                    componenteCurricularInput.value = 'Ciências';
+                    areaConhecimentoInput.value = 'Ciências da Natureza e suas Tecnologias';
+                    etapaCursoSelect.value = 'Ensino Fundamental Anos finais';
+                } else if (disciplina === 'fisica') {
+                    serieSelect.innerHTML += `
+                        <option value="1medio">1ª Série do Ensino Médio</option>
+                        <option value="2medio">2ª Série do Ensino Médio</option>
+                        <option value="3medio">3ª Série do Ensino Médio</option>
+                    `;
+                    componenteCurricularInput.value = 'Física';
+                    areaConhecimentoInput.value = 'Ciências da Natureza e suas Tecnologias';
+                    etapaCursoSelect.value = 'Ensino Médio';
+                } else if (disciplina === 'quimica') {
+                    serieSelect.innerHTML += `
+                        <option value="1medio">1ª Série do Ensino Médio</option>
+                        <option value="2medio">2ª Série do Ensino Médio</option>
+                        <option value="3medio">3ª Série do Ensino Médio</option>
+                    `;
+                    componenteCurricularInput.value = 'Química';
+                    areaConhecimentoInput.value = 'Ciências da Natureza e suas Tecnologias';
+                    etapaCursoSelect.value = 'Ensino Médio';
+                }
+            });
+            
+            // Preencher série no formulário quando selecionada
+            serieSelect.addEventListener('change', function() {
+                const serieText = this.options[this.selectedIndex].text;
+                serieAnoFormInput.value = serieText;
+            });
+            
+            // Buscar conteúdos
+            searchBtn.addEventListener('click', function() {
+                const disciplina = disciplinaSelect.value;
+                const serie = serieSelect.value;
+                
+                if (!disciplina || !serie) {
+                    alert('Por favor, selecione uma disciplina e uma série/ano para buscar.');
+                    return;
+                }
+                
+                // Mostrar loader
+                loader.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                noResults.classList.add('hidden');
+                
+                // Simular busca (em um caso real, aqui seria uma requisição AJAX)
+                setTimeout(function() {
+                    loader.classList.add('hidden');
+                    
+                    if (curriculumData[disciplina] && curriculumData[disciplina][serie]) {
+                        displayResults(disciplina, serie);
+                    } else {
+                        noResults.classList.remove('hidden');
+                        resultsSection.classList.add('hidden');
+                    }
+                }, 800);
+            });
+            
+            // Limpar busca
+            clearSearchBtn.addEventListener('click', function() {
+                disciplinaSelect.value = '';
+                serieSelect.innerHTML = '<option value="">Selecione uma série/ano</option>';
+                resultsSection.classList.add('hidden');
+                noResults.classList.add('hidden');
+                selectedItems = { unidades: [], habilidades: [], objetos: [], procedimentos: [], avaliacao: [] };
+                updateSelectionBadge();
+                panelContent.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Nenhum item selecionado ainda.</p>';
+            });
+            
+            // Mostrar formulário
+            showFormBtn.addEventListener('click', function() {
+                formSection.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                noResults.classList.add('hidden');
+                window.scrollTo({ top: document.getElementById('formSection').offsetTop - 100, behavior: 'smooth' });
+            });
+            
+            // Voltar para busca
+            backToSearchBtn.addEventListener('click', function() {
+                formSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Painel flutuante
+            floatingBtn.addEventListener('click', function() {
+                floatingPanel.classList.toggle('hidden');
+                if (!floatingPanel.classList.contains('hidden')) {
+                    updatePanelContent();
+                }
+            });
+            
+            closePanelBtn.addEventListener('click', function() {
+                floatingPanel.classList.add('hidden');
+            });
+            
+            // Tabs dos resultados
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Ativar tab clicada
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Mostrar conteúdo correspondente
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // Tabs do formulário
+            document.querySelectorAll('[data-form-tab]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabNum = this.getAttribute('data-form-tab');
+                    
+                    // Ativar tab clicada
+                    document.querySelectorAll('[data-form-tab]').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Mostrar conteúdo correspondente
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`trimestre${tabNum}Tab`).classList.add('active');
+                });
+            });
+            
+            // Limpar formulário
+            clearFormBtn.addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja limpar todo o formulário?')) {
+                    document.getElementById('plannerForm').reset();
+                    selectedItems = { unidades: [], habilidades: [], objetos: [], procedimentos: [], avaliacao: [] };
+                    updateSelectionBadge();
+                    panelContent.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Nenhum item selecionado ainda.</p>';
+                }
+            });
+            
+            // Gerar documento DOC
+            generateDocBtn.addEventListener('click', function() {
+                alert('Funcionalidade de exportação para DOC será implementada aqui.\n\nEm um sistema real, esta função geraria um arquivo .doc com todos os dados do formulário.');
+            });
+            
+            // Função para exibir resultados
+            function displayResults(disciplina, serie) {
+                const data = curriculumData[disciplina][serie];
+                const unidadesGrid = document.getElementById('unidadesGrid');
+                const habilidadesGrid = document.getElementById('habilidadesGrid');
+                const objetosGrid = document.getElementById('objetosGrid');
+                const procedimentosGrid = document.getElementById('procedimentosGrid');
+                const avaliacaoGrid = document.getElementById('avaliacaoGrid');
+                
+                // Exibir unidades temáticas
+                unidadesGrid.innerHTML = '';
+                data.unidades.forEach((unidade, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>Unidade ${index + 1} <button class="add-btn" data-type="unidades" data-content="${unidade.replace(/"/g, '&quot;')}">+</button></h4>
+                        <div class="data-content">${unidade}</div>
+                    `;
+                    unidadesGrid.appendChild(card);
+                });
+                
+                // Exibir habilidades
+                habilidadesGrid.innerHTML = '';
+                data.habilidades.forEach((habilidade, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>Habilidade ${index + 1} <button class="add-btn" data-type="habilidades" data-content="${habilidade.replace(/"/g, '&quot;')}">+</button></h4>
+                        <div class="data-content">${habilidade}</div>
+                    `;
+                    habilidadesGrid.appendChild(card);
+                });
+                
+                // Exibir objetos de conhecimento
+                objetosGrid.innerHTML = '';
+                data.objetos.forEach((objeto, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>Objeto ${index + 1} <button class="add-btn" data-type="objetos" data-content="${objeto.replace(/"/g, '&quot;')}">+</button></h4>
+                        <div class="data-content">${objeto}</div>
+                    `;
+                    objetosGrid.appendChild(card);
+                });
+                
+                // Exibir procedimentos metodológicos
+                procedimentosGrid.innerHTML = '';
+                data.procedimentos.forEach((procedimento, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>Procedimento ${index + 1} <button class="add-btn" data-type="procedimentos" data-content="${procedimento.replace(/"/g, '&quot;')}">+</button></h4>
+                        <div class="data-content">${procedimento}</div>
+                    `;
+                    procedimentosGrid.appendChild(card);
+                });
+                
+                // Exibir avaliação
+                avaliacaoGrid.innerHTML = '';
+                data.avaliacao.forEach((avaliacaoItem, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
+                        <h4>Avaliação ${index + 1} <button class="add-btn" data-type="avaliacao" data-content="${avaliacaoItem.replace(/"/g, '&quot;')}">+</button></h4>
+                        <div class="data-content">${avaliacaoItem}</div>
+                    `;
+                    avaliacaoGrid.appendChild(card);
+                });
+                
+                // Adicionar eventos aos botões
+                document.querySelectorAll('.add-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const type = this.getAttribute('data-type');
+                        const content = this.getAttribute('data-content');
+                        addToSelection(type, content, e);
+                    });
+                });
+                
+                // Atualizar contador
+                const totalItems = data.unidades.length + data.habilidades.length + data.objetos.length + data.procedimentos.length + data.avaliacao.length;
+                resultsCount.textContent = `${totalItems} resultados`;
+                
+                // Mostrar seção de resultados
+                resultsSection.classList.remove('hidden');
+                noResults.classList.add('hidden');
+                
+                // Scroll para resultados
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Adicionar item à seleção
+            function addToSelection(type, content, event) {
+                if (!selectedItems[type].includes(content)) {
+                    selectedItems[type].push(content);
+                    updateSelectionBadge();
+                    
+                    // Feedback visual
+                    const btn = event.target;
+                    const originalText = btn.textContent;
+                    btn.textContent = '✓';
+                    btn.style.backgroundColor = '#28a745';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.backgroundColor = '';
+                    }, 1000);
+                    
+                    // Mostrar painel flutuante
+                    floatingPanel.classList.remove('hidden');
+                    updatePanelContent();
+                }
+            }
+            
+            // Atualizar badge de seleção
+            function updateSelectionBadge() {
+                const total = selectedItems.unidades.length + selectedItems.habilidades.length + selectedItems.objetos.length + selectedItems.procedimentos.length + selectedItems.avaliacao.length;
+                selectionBadge.textContent = total;
+                
+                if (total > 0) {
+                    selectionBadge.classList.remove('hidden');
+                } else {
+                    selectionBadge.classList.add('hidden');
+                }
+            }
+            
+            // Atualizar conteúdo do painel
+            function updatePanelContent() {
+                let html = '';
+                
+                if (selectedItems.unidades.length === 0 && 
+                    selectedItems.habilidades.length === 0 && 
+                    selectedItems.objetos.length === 0 &&
+                    selectedItems.procedimentos.length === 0 &&
+                    selectedItems.avaliacao.length === 0) {
+                    html = '<p style="text-align: center; color: #666; padding: 20px;">Nenhum item selecionado ainda.</p>';
+                } else {
+                    // Unidades selecionadas
+                    if (selectedItems.unidades.length > 0) {
+                        html += '<h4 style="margin-top: 0; color: #0056a6;">Unidades Temáticas</h4>';
+                        selectedItems.unidades.forEach(unidade => {
+                            html += `
+                                <div class="data-item">
+                                    <div class="data-content">${unidade}</div>
+                                    <div style="margin-top: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                                        <button class="use-btn" data-type="unidades" data-content="${unidade.replace(/"/g, '&quot;')}">1º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="unidades" data-content="${unidade.replace(/"/g, '&quot;')}" data-trimestre="2">2º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="unidades" data-content="${unidade.replace(/"/g, '&quot;')}" data-trimestre="3">3º Trim</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Habilidades selecionadas
+                    if (selectedItems.habilidades.length > 0) {
+                        html += '<h4 style="margin-top: 20px; color: #0056a6;">Habilidades</h4>';
+                        selectedItems.habilidades.forEach(habilidade => {
+                            html += `
+                                <div class="data-item">
+                                    <div class="data-content">${habilidade}</div>
+                                    <div style="margin-top: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                                        <button class="use-btn" data-type="habilidades" data-content="${habilidade.replace(/"/g, '&quot;')}">1º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="habilidades" data-content="${habilidade.replace(/"/g, '&quot;')}" data-trimestre="2">2º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="habilidades" data-content="${habilidade.replace(/"/g, '&quot;')}" data-trimestre="3">3º Trim</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Objetos selecionados
+                    if (selectedItems.objetos.length > 0) {
+                        html += '<h4 style="margin-top: 20px; color: #0056a6;">Objetos de Conhecimento</h4>';
+                        selectedItems.objetos.forEach(objeto => {
+                            html += `
+                                <div class="data-item">
+                                    <div class="data-content">${objeto}</div>
+                                    <div style="margin-top: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                                        <button class="use-btn" data-type="objetos" data-content="${objeto.replace(/"/g, '&quot;')}">1º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="objetos" data-content="${objeto.replace(/"/g, '&quot;')}" data-trimestre="2">2º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="objetos" data-content="${objeto.replace(/"/g, '&quot;')}" data-trimestre="3">3º Trim</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Procedimentos selecionados
+                    if (selectedItems.procedimentos.length > 0) {
+                        html += '<h4 style="margin-top: 20px; color: #0056a6;">Procedimentos Metodológicos</h4>';
+                        selectedItems.procedimentos.forEach(procedimento => {
+                            html += `
+                                <div class="data-item">
+                                    <div class="data-content">${procedimento}</div>
+                                    <div style="margin-top: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                                        <button class="use-btn" data-type="procedimentos" data-content="${procedimento.replace(/"/g, '&quot;')}">1º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="procedimentos" data-content="${procedimento.replace(/"/g, '&quot;')}" data-trimestre="2">2º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="procedimentos" data-content="${procedimento.replace(/"/g, '&quot;')}" data-trimestre="3">3º Trim</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Avaliação selecionada
+                    if (selectedItems.avaliacao.length > 0) {
+                        html += '<h4 style="margin-top: 20px; color: #0056a6;">Avaliação</h4>';
+                        selectedItems.avaliacao.forEach(avaliacaoItem => {
+                            html += `
+                                <div class="data-item">
+                                    <div class="data-content">${avaliacaoItem}</div>
+                                    <div style="margin-top: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
+                                        <button class="use-btn" data-type="avaliacao" data-content="${avaliacaoItem.replace(/"/g, '&quot;')}">1º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="avaliacao" data-content="${avaliacaoItem.replace(/"/g, '&quot;')}" data-trimestre="2">2º Trim</button>
+                                        <button class="use-btn" style="background-color: #6c757d;" data-type="avaliacao" data-content="${avaliacaoItem.replace(/"/g, '&quot;')}" data-trimestre="3">3º Trim</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Botão para aplicar tudo
+                    html += `
+                        <div style="margin-top: 20px; padding: 15px; background-color: #e6f2ff; border-radius: 5px;">
+                            <button id="applyAllBtn" class="btn" style="width: 100%;">
+                                <i class="fas fa-magic"></i> Aplicar Todos no 1º Trimestre
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                panelContent.innerHTML = html;
+                
+                // Adicionar eventos aos botões de uso
+                document.querySelectorAll('.use-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const type = this.getAttribute('data-type');
+                        const content = this.getAttribute('data-content');
+                        const trimestre = this.getAttribute('data-trimestre') || '1';
+                        
+                        applyToForm(type, content, trimestre);
+                        
+                        // Feedback visual
+                        const originalText = this.textContent;
+                        this.textContent = '✓ Aplicado!';
+                        this.style.backgroundColor = '#28a745';
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                            this.style.backgroundColor = trimestre === '1' ? '' : '#6c757d';
+                        }, 1000);
+                    });
+                });
+                
+                // Botão para aplicar tudo
+                const applyAllBtn = document.getElementById('applyAllBtn');
+                if (applyAllBtn) {
+                    applyAllBtn.addEventListener('click', function() {
+                        applyAllToForm(1);
+                        this.textContent = '✓ Todos aplicados!';
+                        this.style.backgroundColor = '#28a745';
+                        setTimeout(() => {
+                            this.textContent = 'Aplicar Todos no 1º Trimestre';
+                            this.style.backgroundColor = '';
+                        }, 1500);
+                    });
+                }
+            }
+            
+            // Aplicar item ao formulário
+            function applyToForm(type, content, trimestre = '1') {
+                const textareaId = `${type}${trimestre}`;
+                const textarea = document.getElementById(textareaId);
+                
+                if (textarea) {
+                    const currentValue = textarea.value;
+                    textarea.value = currentValue ? `${currentValue}\n• ${content}` : `• ${content}`;
+                    
+                    // Mostrar formulário se estiver oculto
+                    if (formSection.classList.contains('hidden')) {
+                        showFormBtn.click();
+                    }
+                    
+                    // Ir para o trimestre correto
+                    document.querySelector(`[data-form-tab="${trimestre}"]`).click();
+                }
+            }
+            
+            // Aplicar todos os itens ao formulário
+            function applyAllToForm(trimestre = 1) {
+                // Aplicar unidades
+                selectedItems.unidades.forEach(content => {
+                    applyToForm('unidades', content, trimestre);
+                });
+                
+                // Aplicar habilidades
+                selectedItems.habilidades.forEach(content => {
+                    applyToForm('habilidades', content, trimestre);
+                });
+                
+                // Aplicar objetos
+                selectedItems.objetos.forEach(content => {
+                    applyToForm('objetos', content, trimestre);
+                });
+                
+                // Aplicar procedimentos
+                selectedItems.procedimentos.forEach(content => {
+                    applyToForm('procedimentos', content, trimestre);
+                });
+                
+                // Aplicar avaliação
+                selectedItems.avaliacao.forEach(content => {
+                    applyToForm('avaliacao', content, trimestre);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
